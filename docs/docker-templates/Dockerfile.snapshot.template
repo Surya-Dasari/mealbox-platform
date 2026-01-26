@@ -1,0 +1,41 @@
+# =========================================================
+# SNAPSHOT Dockerfile Template
+# ---------------------------------------------------------
+# PURPOSE:
+# - Development / Integration environments only
+# - Resolves SNAPSHOT artifact dynamically from Nexus
+# - NOT suitable for production
+#
+# WARNING:
+# - SNAPSHOT artifacts are mutable
+# - Image is NOT reproducible long-term
+# =========================================================
+
+FROM registry.access.redhat.com/ubi9/openjdk-17-runtime
+
+LABEL app="<SERVICE_NAME>" \
+      runtime="java17" \
+      environment="dev"
+
+WORKDIR /app
+
+# OpenShift random UID support
+RUN mkdir -p /app && chmod -R g+rwX /app
+
+# Resolve SNAPSHOT artifact via maven-metadata.xml
+RUN set -eux; \
+    META_URL="<NEXUS_URL>/repository/<SNAPSHOT_REPO>/<GROUP_PATH>/<ARTIFACT>/<VERSION>/maven-metadata.xml"; \
+    SNAPSHOT=$(curl -fsSL ${META_URL} \
+      | grep '<value>' \
+      | tail -n 1 \
+      | sed -E 's/.*>(.*)<.*/\\1/'); \
+    JAR_NAME="<ARTIFACT>-${SNAPSHOT}.jar"; \
+    curl -fsSL \
+      "<NEXUS_URL>/repository/<SNAPSHOT_REPO>/<GROUP_PATH>/<ARTIFACT>/<VERSION>/${JAR_NAME}" \
+      -o app.jar
+
+EXPOSE <PORT>
+
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport"
+
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]

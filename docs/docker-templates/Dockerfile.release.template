@@ -1,0 +1,34 @@
+# =========================================================
+# RELEASE Dockerfile Template
+# ---------------------------------------------------------
+# PURPOSE:
+# - QA / Staging / Production
+# - Pulls immutable RELEASE artifact from Nexus
+# - Fully reproducible and auditable
+#
+# BEST PRACTICE:
+# - Only RELEASE artifacts allowed
+# - No SNAPSHOT usage in production
+# =========================================================
+
+FROM registry.access.redhat.com/ubi9/openjdk-17-runtime
+
+LABEL app="<SERVICE_NAME>" \
+      runtime="java17" \
+      environment="prod"
+
+WORKDIR /app
+
+# OpenShift random UID support
+RUN mkdir -p /app && chmod -R g+rwX /app
+
+# Download fixed RELEASE artifact
+RUN curl -fL \
+  "<NEXUS_URL>/repository/<RELEASE_REPO>/<GROUP_PATH>/<ARTIFACT>/<VERSION>/<ARTIFACT>-<VERSION>.jar" \
+  -o app.jar
+
+EXPOSE <PORT>
+
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport"
+
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]
