@@ -1,0 +1,7 @@
+apiVersion: v2
+name: mealbox-backend-service
+description: Generic MealBox backend service Helm chart
+type: application
+version: 0.1.0
+appVersion: "SNAPSHOT"
+

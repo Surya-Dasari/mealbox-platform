@@ -1,0 +1,8 @@
+service:
+  name: restaurant-service
+  port: 9102
+
+image:
+  repository: mealbox/restaurant-service
+  tag: snapshot
+

@@ -1,0 +1,8 @@
+service:
+  name: notification-service
+  port: 9107
+
+image:
+  repository: mealbox/notification-service
+  tag: snapshot
+

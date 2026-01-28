@@ -1,0 +1,11 @@
+replicaCount: 1
+
+service:
+  name: order-service
+  port: 9104
+
+image:
+  repository: mealbox/order-service
+  tag: snapshot
+  pullPolicy: IfNotPresent
+
