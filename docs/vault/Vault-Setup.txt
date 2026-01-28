@@ -1,0 +1,122 @@
+# Vault Setup & Bootstrap – MealBox
+
+This document defines the **exact steps** required to bootstrap Vault every time (especially after restart when using `vault-dev`).
+
+---
+
+## Why This Is Needed
+
+When running Vault in **dev mode**:
+
+* All secrets are **in-memory**
+* Restart = **ALL secrets lost**
+* Jenkins pipelines will fail with `permission denied`
+
+This script recreates everything **consistently**.
+
+---
+
+## Prerequisites
+
+* Vault running in dev mode
+* Root token available (from vault startup logs)
+
+---
+
+## Step 1: Login as Root
+
+```bash
+export VAULT_ADDR=http://127.0.0.1:8200
+vault login <ROOT_TOKEN>
+```
+
+---
+
+## Step 2: Enable KV v2
+
+```bash
+vault secrets enable -path=secret kv-v2
+```
+
+---
+
+## Step 3: Create Jenkins Policy
+
+Create file `mealbox-ci-policy.hcl`:
+
+```hcl
+path "secret/data/mealbox/*" {
+  capabilities = ["read"]
+}
+```
+
+Apply policy:
+
+```bash
+vault policy write mealbox-ci mealbox-ci-policy.hcl
+```
+
+---
+
+## Step 4: Create Jenkins Token
+
+```bash
+vault token create \
+  -policy=mealbox-ci \
+  -ttl=24h
+```
+
+Save the generated token.
+
+---
+
+## Step 5: Store Secrets
+
+### Nexus
+
+```bash
+vault kv put secret/mealbox/ci \
+  nexus_username=admin \
+  nexus_password=admin123
+```
+
+### Docker Hub
+
+```bash
+vault kv put secret/mealbox/dockerhub \
+  username=<dockerhub-user> \
+  password=<dockerhub-token>
+```
+
+---
+
+## Step 6: Jenkins Configuration
+
+1. Jenkins → Manage Credentials
+2. Add **Vault Token Credential**
+3. Paste token created in Step 4
+
+---
+
+## Golden Rule (IMPORTANT)
+
+> ❗ If Vault restarts → **Run this entire document again**
+
+---
+
+## Production Note
+
+For real environments:
+
+* Do **NOT** use `vault-dev`
+* Use file or raft storage
+* Use AppRole instead of tokens
+
+---
+
+## Status
+
+✔ Reproducible
+✔ CI-safe
+✔ Jenkins-compatible
+
