@@ -1,0 +1,14 @@
+app:
+  name: api-gateway-service
+
+image:
+  repository: suryadasari31/mealbox-api-gateway-service
+  tag: snapshot
+
+service:
+  port: 9100
+  targetPort: 9100
+
+route:
+  enabled: true
+
