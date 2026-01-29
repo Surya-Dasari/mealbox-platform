@@ -1,0 +1,8 @@
+service:
+  name: payment-service
+  port: 9106
+
+image:
+  repository: mealbox/payment-service
+  tag: snapshot
+

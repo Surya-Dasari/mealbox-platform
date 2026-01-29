@@ -1,0 +1,16 @@
+service:
+  name: order-service
+  port: 9104
+
+image:
+  repository: mealbox/order-service
+  tag: snapshot
+
+env:
+  - name: SPRING_DATASOURCE_URL
+    value: jdbc:postgresql://order-postgres:5432/orderdb
+  - name: SPRING_DATASOURCE_USERNAME
+    value: orderuser
+  - name: SPRING_DATASOURCE_PASSWORD
+    value: orderpass
+
