@@ -1,8 +1,0 @@
-service:
-  name: api-gateway
-  port: 9100
-
-image:
-  repository: mealbox/api-gateway
-  tag: snapshot
-
